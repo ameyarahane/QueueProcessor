@@ -7,6 +7,9 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+/**
+ * An implementation of the Buffer that provides synchronized access to the buffer.
+ */
 public class SynchronizedBuffer<T> implements Buffer<T> {
 
     private static final float BUFFER_FACTOR = 1.5f;
@@ -25,7 +28,7 @@ public class SynchronizedBuffer<T> implements Buffer<T> {
      * @return true if elements were added to buffer successfully, else false.
      */
     @Override
-    public boolean bufferElements(Collection<T> elements) {
+    public boolean addToBuffer(Collection<T> elements) {
         if (!hasCapacity()) {
             return false;
         }
@@ -33,9 +36,12 @@ public class SynchronizedBuffer<T> implements Buffer<T> {
         return true;
     }
 
+    /**
+     * Removes and returns as a List elements up to the number provided.
+     */
     @Override
-    public List<T> getElements(int size) {
-        List<T> removed = buffer.stream().limit(size).collect(Collectors.toList());
+    public List<T> getElements(int number) {
+        List<T> removed = buffer.stream().limit(number).collect(Collectors.toList());
         buffer.removeAll(removed);
         return removed;
     }

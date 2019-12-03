@@ -1,10 +1,8 @@
-package com.ameya.queueprocessor;
+package com.ameya.queueprocessor.pollers;
 
 public interface MessagePoller {
 
     void poll();
-
-    void start();
 
     void stop();
 }

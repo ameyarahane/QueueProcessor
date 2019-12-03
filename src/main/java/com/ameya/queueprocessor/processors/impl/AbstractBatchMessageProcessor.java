@@ -1,14 +1,15 @@
 package com.ameya.queueprocessor.processors.impl;
 
 import com.amazonaws.services.sqs.model.Message;
-import com.ameya.queueprocessor.BatchProcessingFailureHandler;
-import com.ameya.queueprocessor.BatchProcessingSuccessHandler;
 import com.ameya.queueprocessor.exceptions.NonRetryableException;
 import com.ameya.queueprocessor.exceptions.RetryableException;
+import com.ameya.queueprocessor.handlers.FailureHandler;
+import com.ameya.queueprocessor.handlers.SuccessHandler;
 import com.ameya.queueprocessor.processors.BatchMessageProcessor;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.log4j.Log4j2;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -16,17 +17,18 @@ import java.util.Map;
 
 @RequiredArgsConstructor
 @Getter
+@Log4j2
 public abstract class AbstractBatchMessageProcessor implements BatchMessageProcessor {
 
     @NonNull
-    private final BatchProcessingSuccessHandler successHandler;
+    private final SuccessHandler successHandler;
     @NonNull
-    private final BatchProcessingFailureHandler failureHandler;
+    private final FailureHandler failureHandler;
 
     @Override
     public void processBatch(Collection<Message> messages) {
         Map<Message, RetryableException> retryableFailures = new HashMap();
-        Map<Message, NonRetryableException> permanentFailures = new HashMap();
+        Map<Message, NonRetryableException> nonRetryableFailures = new HashMap();
 
         messages.forEach(m -> {
             try {
@@ -36,17 +38,17 @@ public abstract class AbstractBatchMessageProcessor implements BatchMessageProce
                 if (isRetryableFailure(e)) {
                     retryableFailures.put(m, new RetryableException(e));
                 } else {
-                    permanentFailures.put(m, new NonRetryableException(e));
+                    nonRetryableFailures.put(m, new NonRetryableException(e));
                 }
             }
         });
 
         if (!retryableFailures.isEmpty()) {
-            handleBatchRetryableFailures(retryableFailures);
+            handleRetryableFailures(retryableFailures);
         }
 
-        if (!permanentFailures.isEmpty()) {
-            handleBatchNonRetryableFailures(permanentFailures);
+        if (!nonRetryableFailures.isEmpty()) {
+            handleNonRetryableFailures(nonRetryableFailures);
         }
     }
 
@@ -56,12 +58,18 @@ public abstract class AbstractBatchMessageProcessor implements BatchMessageProce
         successHandler.handleSuccess(message);
     }
 
-    protected void handleBatchRetryableFailures(final Map<Message, RetryableException> retryableFailures) {
-        failureHandler.handleBatchRetryableFailures(retryableFailures);
+    protected void handleRetryableFailures(final Map<Message, RetryableException> retryableFailures) {
+        retryableFailures.forEach((message, exception) ->
+                log.error("Error processing message: [{}] due to exception: [{}]", message, exception.getMessage(),
+                        exception));
+        failureHandler.handleRetryableFailures(retryableFailures);
     }
 
-    protected void handleBatchNonRetryableFailures(final Map<Message, NonRetryableException> nonRetryableFailures) {
-        failureHandler.handleBatchNonRetryableFailures(nonRetryableFailures);
+    protected void handleNonRetryableFailures(final Map<Message, NonRetryableException> nonRetryableFailures) {
+        nonRetryableFailures.forEach((message, exception) ->
+                log.error("Error processing message: [{}] due to exception: [{}]", message, exception.getMessage(),
+                        exception));
+        failureHandler.handleNonRetryableFailures(nonRetryableFailures);
     }
 
     protected boolean isRetryableFailure(final RuntimeException e) {

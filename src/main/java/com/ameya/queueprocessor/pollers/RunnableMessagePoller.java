@@ -1,17 +1,20 @@
-package com.ameya.queueprocessor;
+package com.ameya.queueprocessor.pollers;
 
 import lombok.NonNull;
 import lombok.extern.log4j.Log4j2;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
+/**
+ * Adds a Runnable wrapper around the MessagePoller class.
+ */
 @Log4j2
-public class MessagePollerRunnable implements Runnable {
+public class RunnableMessagePoller implements Runnable {
 
     private final AtomicBoolean running;
     private final MessagePoller poller;
 
-    public MessagePollerRunnable(@NonNull final MessagePoller poller) {
+    public RunnableMessagePoller(@NonNull final MessagePoller poller) {
         this.poller = poller;
         this.running = new AtomicBoolean(false);
     }
@@ -39,7 +42,7 @@ public class MessagePollerRunnable implements Runnable {
 
     private void sleep() {
         try {
-            Thread.sleep(1000);
+            Thread.sleep(1000); // Arbitrary time interval
         } catch (InterruptedException e) {
             throw new RuntimeException(String.format("Thread %s interrupted!", Thread.currentThread().getName(), e));
         }

@@ -1,8 +1,8 @@
 package com.ameya.queueprocessor.processors.impl;
 
 import com.amazonaws.services.sqs.model.Message;
-import com.ameya.queueprocessor.BatchProcessingFailureHandler;
-import com.ameya.queueprocessor.BatchProcessingSuccessHandler;
+import com.ameya.queueprocessor.handlers.FailureHandler;
+import com.ameya.queueprocessor.handlers.SuccessHandler;
 import lombok.NonNull;
 
 /**
@@ -10,8 +10,8 @@ import lombok.NonNull;
  */
 public class SimpleBatchMessageProcessor extends AbstractBatchMessageProcessor {
 
-    public SimpleBatchMessageProcessor(@NonNull final BatchProcessingSuccessHandler successHandler,
-                                       @NonNull final BatchProcessingFailureHandler failureHandler) {
+    public SimpleBatchMessageProcessor(@NonNull final SuccessHandler successHandler,
+                                       @NonNull final FailureHandler failureHandler) {
         super(successHandler, failureHandler);
     }
 

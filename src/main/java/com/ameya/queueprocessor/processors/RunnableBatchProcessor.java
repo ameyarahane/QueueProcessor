@@ -8,7 +8,7 @@ import java.util.Collection;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 @Log4j2
-public class BatchProcessorRunnable implements Runnable {
+public class RunnableBatchProcessor implements Runnable {
 
     private static final int DEFAULT_BATCH_SIZE = 5;
     private final AtomicBoolean running;
@@ -17,7 +17,7 @@ public class BatchProcessorRunnable implements Runnable {
     private final int sleepDelayMs;
     private final int batchSize;
 
-    public BatchProcessorRunnable(final SynchronizedBuffer<Message> buffer,
+    public RunnableBatchProcessor(final SynchronizedBuffer<Message> buffer,
                                   final BatchMessageProcessor batchMessageProcessor,
                                   final int sleepDelayMs, final int batchSize) {
         this.buffer = buffer;

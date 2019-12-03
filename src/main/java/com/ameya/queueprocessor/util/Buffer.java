@@ -10,7 +10,7 @@ public interface Buffer<T> {
      *
      * @return true if elements were added to buffer successfully, else false.
      */
-    public boolean bufferElements(Collection<T> elements);
+    public boolean addToBuffer(Collection<T> elements);
 
     public List<T> getElements(int size);
 }
